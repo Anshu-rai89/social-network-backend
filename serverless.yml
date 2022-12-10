@@ -1,0 +1,54 @@
+service: social-network-backend
+frameworkVersion: '2'
+
+plugins:
+  - serverless-appsync-plugin
+provider:
+  name: aws
+  runtime: nodejs12.x
+  region: us-east-2
+
+package:
+  exclude:
+    - package-lock.json
+    - package.json
+custom:
+  appSync:
+    - ${file(serverless-appsync.yaml)}
+resources:
+  Resources:
+    UserPool:
+      Type: AWS::Cognito::UserPool
+      Properties:
+        AutoVerifiedAttributes:
+          - email
+        Policies:
+          PasswordPolicy:
+            MinimumLength: 8
+            RequireLowercase: false
+            RequireNumbers: false
+            RequireUppercase: false
+            RequireSymbols: false
+        UsernameAttributes:
+          - email
+
+        Schema:
+          - AttributeDataType: string
+            Name: name
+            Required: false
+            Mutable: true
+    
+    WebUserPoolClient:
+      Type: AWS::Cognito::UserPoolClient
+      Properties:
+        UserPoolId: !Ref UserPool
+        ClientName: web
+        ExplicitAuthFlows:
+          - ALLOW_USER_SRP_AUTH
+          - ALLOW_USER_PASSWORD_AUTH
+          - ALLOW_REFRESH_TOKEN_AUTH
+        PreventUserExistenceErrors: ENABLED
+
+  Outputs:
+    CognitoUserPoolId:
+      Value: !Ref UserPool
