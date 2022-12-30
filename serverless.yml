@@ -3,20 +3,57 @@ frameworkVersion: '2'
 
 plugins:
   - serverless-appsync-plugin
+  - serverless-iam-roles-per-function
+  - serverless-export-env
+
 provider:
   name: aws
   runtime: nodejs12.x
   region: us-east-2
+  environment:
+    STAGE: ${self:custom.stage}
+    AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
 
 package:
   exclude:
     - package-lock.json
     - package.json
 custom:
+  region: ${opt:region, self:provider.region}
   appSync:
     - ${file(serverless-appsync.yaml)}
+  stage: ${opt:stage, self:provider.stage}
+
+functions:
+  confirmUsersSignup:
+    handler: functions/confirm-users-signup.handler
+    environment:
+      USERS_TABLE: !Ref UsersTable
+    
+    iamRoleStatements:
+      - Effect: Allow
+        Action: dynamodb:PutItem
+        Resource: !GetAtt UsersTable.Arn
+    
+
 resources:
   Resources:
+    UsersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        BillingMode: PAY_PER_REQUEST
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        Tags:
+          - Key: Environment
+            Value: ${self:custom.stage}
+          - Key: Name
+            Value: users-table
+          
     UserPool:
       Type: AWS::Cognito::UserPool
       Properties:
@@ -33,10 +70,20 @@ resources:
           - email
 
         Schema:
-          - AttributeDataType: string
+          - AttributeDataType: String
             Name: name
             Required: false
             Mutable: true
+        LambdaConfig:
+          PostConfirmation: !GetAtt ConfirmUsersSignupLambdaFunction.Arn
+    
+    UserPoolInvokeConfirmUserSignUpPermission:
+      Type: AWS::Lambda::Permission
+      Properties:
+        Action: lambda:invokeFunction
+        FunctionName: !Ref ConfirmUsersSignupLambdaFunction
+        Principal: cognito-idp.amazonaws.com
+        SourceArn: !GetAtt UserPool.Arn
     
     WebUserPoolClient:
       Type: AWS::Cognito::UserPoolClient
@@ -50,5 +97,9 @@ resources:
         PreventUserExistenceErrors: ENABLED
 
   Outputs:
+    AWSRegion:
+      Value: ${self:custom.region}
     CognitoUserPoolId:
       Value: !Ref UserPool
+    WebCognitoUserPoolClientId:
+      Value: !Ref WebUserPoolClient
