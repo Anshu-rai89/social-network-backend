@@ -1,4 +1,3 @@
-require('dotenv').config()
 const DynamoDB = require('aws-sdk/clients/dynamodb');
 const DocumentClient = new DynamoDB.DocumentClient();
 const { USERS_TABLE } = process.env;
