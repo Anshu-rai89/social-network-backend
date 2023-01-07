@@ -38,8 +38,8 @@ const a_authenticated_user = async ()=> {
   const {name, email, password} = a_random_user();
 
    const cognito = new AWS.CognitoIdentityServiceProvider();
-    const userPoolId = process.env.COGNITO_USERS_POOL_ID;
-    const clientId = process.env.WEB_CLIENT_ID;
+    const userPoolId = process.env.COGNITO_USER_POOL_ID;
+    const clientId = process.env.WEB_COGNITO_USER_POOL_CLIENT_ID;
 
     const signUpRes = await cognito.signUp({
       ClientId:clientId,

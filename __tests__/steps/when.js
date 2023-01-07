@@ -9,7 +9,7 @@ const we_invoke_confirmSignUpUser = async (userName, email, name) => {
     event = {
       version: "1",
       region: process.env.AWS_REGION,
-      userPoolId: process.env.COGNITO_USERS_POOL_ID,
+      userPoolId: process.env.COGNITO_USER_POOL_ID,
       userName: userName,
       triggerSource: "PostConfirmation_ConfirmSignUp",
       request: {
@@ -31,8 +31,8 @@ const we_invoke_confirmSignUpUser = async (userName, email, name) => {
 
 const a_user_signup = async (email,name,password) => {
     const cognito = new AWS.CognitoIdentityServiceProvider();
-    const userPoolId = process.env.COGNITO_USERS_POOL_ID;
-    const clientId = process.env.WEB_CLIENT_ID;
+    const userPoolId = process.env.COGNITO_USER_POOL_ID;
+    const clientId = process.env.WEB_COGNITO_USER_POOL_CLIENT_ID;
 
     const signUpRes = await cognito.signUp({
       ClientId:clientId,
@@ -98,9 +98,41 @@ const a_user_calls_getMyProfile = async (user)=> {
 
 }
 
+const a_user_calls_editMyProfile = async (user, input) => {
+  const editProfileQuery = `
+    mutation MyMutation($input: ProfileInput!) {
+    editMyProfile(newProfile: $input){
+      name
+      screenName
+      createdAt
+      id
+      tweetsCount
+      followingCount
+      followersCount
+    }
+  }
+  `;
+
+  const variables = {
+    input
+  }
+
+  const data = await GraphQL(
+    process.env.API_URL,
+    editProfileQuery,
+    variables,
+    user.accessToken
+  );
+  const profile = data.editMyProfile;
+  console.log(`[${user.userName} profile edited]`);
+
+  return profile;
+};
+
 module.exports = {
   we_invoke_confirmSignUpUser,
   a_user_signup,
   we_invoke_appSync_template,
   a_user_calls_getMyProfile,
+  a_user_calls_editMyProfile,
 };
