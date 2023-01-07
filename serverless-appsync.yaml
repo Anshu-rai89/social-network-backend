@@ -10,9 +10,17 @@ mappingTemplates:
   - type: Query
     field: getMyProfile
     dataSource: usersTable
+  
+  - type: Query
+    field: getImageUploadUrl
+    dataSource: getImageUploadUrl
+    request: false
+    response: false
+  
   - type: Mutation
     field: editMyProfile
     dataSource: usersTable
+    
 
 dataSources:
   - type: NONE
@@ -21,3 +29,7 @@ dataSources:
     name: usersTable
     config: 
       tableName: !Ref UsersTable
+  - type: AWS_LAMBDA
+    name: getImageUploadUrl
+    config:
+      functionName: getImageUploadUrlFunction
