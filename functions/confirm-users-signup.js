@@ -11,7 +11,7 @@ module.exports.handler = async (event) => {
         const screenName = `${name.replace(/[^a-zA-Z0-9]/g)}${suffix}`;
         const user = {
             id:event.userName,
-            name: 
+            name:name, 
             screenName,
             createdAt: new Date().toJSON(),
             followersCount: 0,
