@@ -1,34 +1,35 @@
-const S3 = require('aws-sdk/clients/s3'),
-    ulid = require('ulid'),
-    s3 = new S3({useAccelerateEndpoint: true}) ;
+const S3 = require("aws-sdk/clients/s3");
+const s3 = new S3({ useAccelerateEndpoint: true });
+const ulid = require("ulid");
+
+const { BUCKET_NAME } = process.env;
 
 module.exports.handler = async (event) => {
-    const {BUCKET_NAME } = process.env,
-        id = ulid.ulid(),
-        userName = event.identity.userName;
-    let key = `${userName}/${id}`;
-    const extension = event.arguments.extension,
-        contentType = event.arguments.contentType || 'image/jpeg';
+  const id = ulid.ulid();
+  let key = `${event.identity.username}/${id}`;
 
-    if(extension) {
-        if(extension.startsWith('.')) {
-            key+= extension
-        }
-        else 
-        key+= `.${extension}`;
+  const extension = event.arguments.extension;
+  if (extension) {
+    if (extension.startsWith(".")) {
+      key += extension;
+    } else {
+      key += `.${extension}`;
     }
+  }
 
-    if(!contentType.startsWith('image/')) {
-        throw new Error('Content type must be an image');
-    }
+  const contentType = event.arguments.contentType || "image/jpeg";
+  if (!contentType.startsWith("image/")) {
+    throw new Error("content type should be an image");
+  }
 
-    const params = {
-        Bucket: BUCKET_NAME,
-        Key: key,
-        ACL: 'public-read',
-        ContentType: contentType
-    }
+  const params = {
+    Bucket: BUCKET_NAME,
+    Key: key,
+    ACL: "public-read",
+    ContentType: contentType,
+  };
 
-    const signedUrl = s3.getSignedUrl('putObject',params);
-    return signedUrl;
-}
+  console.log("Params",params);
+  const signedUrl = s3.getSignedUrl("putObject", params);
+  return signedUrl;
+};

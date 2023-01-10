@@ -13,7 +13,7 @@ mappingTemplates:
   
   - type: Query
     field: getImageUploadUrl
-    dataSource: getImageUploadUrl
+    dataSource: getImageUploadUrlFunction
     request: false
     response: false
   
@@ -30,6 +30,6 @@ dataSources:
     config: 
       tableName: !Ref UsersTable
   - type: AWS_LAMBDA
-    name: getImageUploadUrl
+    name: getImageUploadUrlFunction
     config:
       functionName: getImageUploadUrlFunction

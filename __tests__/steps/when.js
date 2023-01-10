@@ -129,10 +129,52 @@ const a_user_calls_editMyProfile = async (user, input) => {
   return profile;
 };
 
+const we_invoke_getImageUploadUrl = async (userName, extension, contentType)=> {
+   const getImageUrlHandler = require("../../functions/get-signed-url.js").handler,
+    context = {},
+    event = {
+      identity: {
+        userName
+      },
+      arguments: {
+        extension,
+        contentType
+    }
+    };
+
+   return await getImageUrlHandler(event, context);
+}
+
+const a_user_calls_getImageUpload = async (user, extension, contentType) => {
+  const getImageUploadUrl = `
+    query MyQuery($extension: String, $contentType: String){
+    getImageUploadUrl(extension: $extension, contentType: $contentType)
+  }
+  `;
+
+  const variables = {
+    extension,
+    contentType
+  };
+
+  const data = await GraphQL(
+    process.env.API_URL,
+    getImageUploadUrl,
+    variables,
+    user.accessToken
+  );
+  const url = data.getImageUploadUrl;
+  console.log(`[${user.userName} image upload url fetched]`);
+
+  return url;
+}
+
 module.exports = {
   we_invoke_confirmSignUpUser,
   a_user_signup,
   we_invoke_appSync_template,
   a_user_calls_getMyProfile,
   a_user_calls_editMyProfile,
+  we_invoke_getImageUploadUrl,
+  a_user_calls_getImageUpload,
 };
