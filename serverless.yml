@@ -50,7 +50,22 @@ functions:
           - s3:PutObject
           - s3:PutObjectAcl
         Resource: !Sub ${AssetsBucket.Arn}/*
-    
+  tweet:
+    handler: functions/tweets.handler
+    environment:
+      TWEETS_TABLE: !Ref TweetsTable
+      USERS_TABLE: !Ref UsersTable
+      TIMELINES_TABLE: !Ref TimelineTable
+    iamRoleStatements:
+      - Effect: Allow
+        Action: dynamodb:UpdateItem
+        Resource: !GetAtt UsersTable.Arn
+      - Effect: Allow
+        Action: dynamodb:PutItem
+        Resource: 
+        - !GetAtt TweetsTable.Arn
+        - !GetAtt TimelineTable.Arn
+
 
 resources:
   Resources:
@@ -69,7 +84,55 @@ resources:
             Value: ${self:custom.stage}
           - Key: Name
             Value: users-table
-          
+    
+    TweetsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        BillingMode: PAY_PER_REQUEST
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH 
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+          - AttributeName: creator
+            AttributeType: S
+        GlobalSecondaryIndexes:
+          - IndexName: byCreator
+            KeySchema:
+              - AttributeName: creator
+                KeyType: HASH
+              - AttributeName: id
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+                
+        Tags:
+          - Key: Environment
+            Value: ${self:custom.stage}
+          - Key: Name
+            Value: tweets-table
+    
+    TimelineTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        BillingMode: PAY_PER_REQUEST
+        KeySchema:
+          - AttributeName: userId
+            KeyType: HASH 
+          - AttributeName: tweetId
+            KeyType: RANGE 
+        AttributeDefinitions:
+          - AttributeName: userId
+            AttributeType: S
+          - AttributeName: tweetId
+            AttributeType: S
+        Tags:
+          - Key: Environment
+            Value: ${self:custom.stage}
+          - Key: Name
+            Value: timeline-table
+    
     UserPool:
       Type: AWS::Cognito::UserPool
       Properties:
