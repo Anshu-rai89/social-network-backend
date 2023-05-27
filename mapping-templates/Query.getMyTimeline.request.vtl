@@ -1,17 +1,15 @@
-#if ($context.arguments.limit > 25)
-    $util.error("max limit is 25")
-#end 
+#set ($isValidLimit = $context.arguments.limit <= 25)
+$util.validate($isValidLimit, "max limit is 25")
 
 {
   "version" : "2018-05-29",
   "operation" : "Query",
   "query" : {
-    "expression" : "creator = :userId",
+    "expression" : "userId = :userId",
     "expressionValues" : {
-      ":userId" : $util.dynamodb.toDynamoDBJson($context.arguments.userId)
+      ":userId" : $util.dynamodb.toDynamoDBJson($context.identity.username)
     }
   },
-  "index" : "byCreator",
   "nextToken" : $util.toJson($context.arguments.nextToken),
   "limit" : $util.toJson($context.arguments.limit),
   "scanIndexForward" : false,
