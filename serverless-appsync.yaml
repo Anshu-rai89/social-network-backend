@@ -24,6 +24,10 @@ mappingTemplates:
   - type: Query
     field: getMyTimeline
     dataSource: timelinesTable
+
+  - type: Query
+    field: getLikes
+    dataSource: likesTable
   
   - type: Mutation
     field: editMyProfile
@@ -37,7 +41,7 @@ mappingTemplates:
 
   - type: Mutation
     field: like
-    dataSource: likesTable
+    dataSource: likesTimeline
   
   - type: Mutation
     field: unlike
@@ -50,7 +54,7 @@ mappingTemplates:
   - type: Tweet
     field: liked
     dataSource: likesTable
-  - type: TimelinePage
+  - type: UnHydratedTweetsPage
     field: tweets
     dataSource: tweetsTable
 
@@ -72,7 +76,7 @@ dataSources:
       tableName: !Ref TimelineTable
   
   - type: AMAZON_DYNAMODB
-    name: likesTable
+    name: likesTimeline
     config:
       tableName: !Ref LikesTable
       iamRoleStatements:
@@ -84,6 +88,11 @@ dataSources:
       - Effect: Allow
         Action: dynamodb:PutItem
         Resource: !GetAtt LikesTable.Arn
+
+  - type: AMAZON_DYNAMODB
+    name: likesTable
+    config:
+      tableName: !Ref LikesTable
   
   - type: AMAZON_DYNAMODB
     name: unLikesTable
