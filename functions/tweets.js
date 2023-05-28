@@ -1,7 +1,10 @@
-const DynamoDB = require("aws-sdk/clients/dynamodb");
-const DocumentClient = new DynamoDB.DocumentClient();
+const DynamoDB = require("@aws-sdk/client-dynamodb");
+const {DynamoDBDocumentClient, TransactWriteCommand} = require("@aws-sdk/lib-dynamodb");
 const ulid = require("ulid");
 const { TweetTypes } = require("../lib/constants");
+
+const client = new DynamoDB.DynamoDBClient({});
+const docClient = DynamoDBDocumentClient.from(client);
 
 const { USERS_TABLE, TIMELINES_TABLE, TWEETS_TABLE } = process.env;
 
@@ -21,8 +24,8 @@ module.exports.handler = async (event) => {
     likes: 0,
     retweets: 0
   };
-
-  await DocumentClient.transactWrite({
+ 
+  const command = new TransactWriteCommand({
     TransactItems: [
       {
         Put: {
@@ -54,7 +57,9 @@ module.exports.handler = async (event) => {
         },
       },
     ],
-  }).promise();
+  });
+
+  const response = await docClient.send(command);
 
   return newTweet;
 };

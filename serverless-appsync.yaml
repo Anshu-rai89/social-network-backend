@@ -40,6 +40,18 @@ mappingTemplates:
     response: false
 
   - type: Mutation
+    field: retweet
+    dataSource: reTweetFunction
+    request: false
+    response: false
+
+  - type: Mutation
+    field: unretweet
+    dataSource: unReTweetFunction
+    request: false
+    response: false
+
+  - type: Mutation
     field: like
     dataSource: likesTimeline
   
@@ -56,6 +68,22 @@ mappingTemplates:
     dataSource: likesTable
   - type: UnHydratedTweetsPage
     field: tweets
+    dataSource: tweetsTable
+  - type: MyProfile
+    field: tweets
+    dataSource: tweetsTable
+  - type: OtherProfile
+    field: tweets
+    dataSource: tweetsTable
+
+  - type: Retweet
+    field: profile
+    dataSource: usersTable
+    request: Tweet.profile.request.vtl
+    response: Tweet.profile.response.vtl
+
+  - type: Retweet
+    field: retweetOf
     dataSource: tweetsTable
 
 
@@ -116,6 +144,15 @@ dataSources:
     name: tweetFunction
     config:
       functionName: tweet
+  
+  - type: AWS_LAMBDA
+    name: reTweetFunction
+    config:
+      functionName: reTweet
+  - type: AWS_LAMBDA
+    name: unReTweetFunction
+    config:
+      functionName: unReTweet
 
 substitutions:
   TweetsTable: !Ref TweetsTable
