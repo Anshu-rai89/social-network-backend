@@ -59,6 +59,12 @@ mappingTemplates:
     field: unlike
     dataSource: unLikesTable
   
+  - type: Mutation
+    field: reply
+    dataSource: replyFunction
+    request: false
+    response: false
+  
   #nested fields
   - type: Tweet
     field: profile
@@ -82,9 +88,23 @@ mappingTemplates:
     request: Tweet.profile.request.vtl
     response: Tweet.profile.response.vtl
 
+  - type: Reply
+    field: profile
+    dataSource: usersTable
+    request: Tweet.profile.request.vtl
+    response: Tweet.profile.response.vtl
+
   - type: Retweet
     field: retweetOf
     dataSource: tweetsTable
+  
+  - type: Reply
+    field: inReplyToTweet
+    dataSource: tweetsTable
+
+  - type: Reply
+    field: inReplyToUsers
+    dataSource: usersTable
 
 
 dataSources:
@@ -153,6 +173,10 @@ dataSources:
     name: unReTweetFunction
     config:
       functionName: unReTweet
+  - type: AWS_LAMBDA
+    name: replyFunction
+    config:
+      functionName: reply
 
 substitutions:
   TweetsTable: !Ref TweetsTable

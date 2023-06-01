@@ -114,6 +114,27 @@ functions:
         Action: dynamodb:QueryItem
         Resource: !Sub "${TweetsTable.Arn}/index/retweetsByCreator"
 
+  reply:
+    handler: functions/reply.handler
+    environment:
+      TWEETS_TABLE: !Ref TweetsTable
+      USERS_TABLE: !Ref UsersTable
+      TIMELINES_TABLE: !Ref TimelineTable
+    iamRoleStatements:
+      - Effect: Allow
+        Action: dynamodb:UpdateItem
+        Resource:
+          - !GetAtt UsersTable.Arn
+          - !GetAtt TweetsTable.Arn
+      - Effect: Allow
+        Action: dynamodb:GetItem
+        Resource: !GetAtt TweetsTable.Arn
+      - Effect: Allow
+        Action: dynamodb:PutItem
+        Resource:
+          - !GetAtt TweetsTable.Arn
+          - !GetAtt TimelineTable.Arn
+
 
 resources:
   Resources:
