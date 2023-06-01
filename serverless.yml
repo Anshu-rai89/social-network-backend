@@ -148,6 +148,15 @@ resources:
         AttributeDefinitions:
           - AttributeName: id
             AttributeType: S
+          - AttributeName: screenName
+            AttributeType: S
+        GlobalSecondaryIndexes:
+          - IndexName: byScreenName
+            KeySchema:
+              - AttributeName: screenName
+                KeyType: HASH
+            Projection:
+                ProjectionType: ALL
         Tags:
           - Key: Environment
             Value: ${self:custom.stage}
@@ -241,7 +250,38 @@ resources:
             Value: ${self:custom.stage}
           - Key: Name
             Value: likes-table
-    
+    RelationshipsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        BillingMode: PAY_PER_REQUEST
+        KeySchema:
+          - AttributeName: userId
+            KeyType: HASH 
+          - AttributeName: sk
+            KeyType: RANGE 
+        AttributeDefinitions:
+          - AttributeName: userId
+            AttributeType: S
+          - AttributeName: sk
+            AttributeType: S
+          - AttributeName: otherUserId
+            AttributeType: S
+        GlobalSecondaryIndexes:
+          - IndexName: byOtherUser
+            KeySchema:
+              - AttributeName: otherUserId
+                KeyType: HASH
+              - AttributeName: sk
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+                
+        Tags:
+          - Key: Environment
+            Value: ${self:custom.stage}
+          - Key: Name
+            Value: likes-table
+
     UserPool:
       Type: AWS::Cognito::UserPool
       Properties:

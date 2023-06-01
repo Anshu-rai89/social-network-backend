@@ -29,6 +29,10 @@ mappingTemplates:
     field: getLikes
     dataSource: likesTable
   
+  - type: Query
+    field: getProfile
+    dataSource: usersTable
+  
   - type: Mutation
     field: editMyProfile
     dataSource: usersTable
@@ -64,6 +68,10 @@ mappingTemplates:
     dataSource: replyFunction
     request: false
     response: false
+  
+  - type: Mutation
+    field: follow
+    dataSource: relationshipsMutationTable
   
   #nested fields
   - type: Tweet
@@ -105,6 +113,15 @@ mappingTemplates:
   - type: Reply
     field: inReplyToUsers
     dataSource: usersTable
+
+  - type: OtherProfile
+    field: following
+    dataSource: relationshipsTable
+  
+  - type: OtherProfile
+    field: followedBy
+    dataSource: relationshipsTable
+  
 
 
 dataSources:
@@ -155,7 +172,24 @@ dataSources:
       - Effect: Allow
         Action: dynamodb:DeleteItem
         Resource: !GetAtt LikesTable.Arn
-    
+      
+  - type: AMAZON_DYNAMODB
+    name: relationshipsMutationTable
+    config:
+      tableName: !Ref RelationshipsTable
+      iamRoleStatements:
+      - Effect: Allow
+        Action: dynamodb:UpdateItem
+        Resource: !GetAtt UsersTable.Arn
+      - Effect: Allow
+        Action: dynamodb:PutItem
+        Resource: !GetAtt RelationshipsTable.Arn
+  
+  - type: AMAZON_DYNAMODB
+    name: relationshipsTable
+    config:
+      tableName: !Ref RelationshipsTable
+
   - type: AWS_LAMBDA
     name: getImageUploadUrlFunction
     config:
@@ -182,3 +216,4 @@ substitutions:
   TweetsTable: !Ref TweetsTable
   LikesTable: !Ref LikesTable
   UsersTable: !Ref UsersTable
+  RelationshipsTable: !Ref RelationshipsTable

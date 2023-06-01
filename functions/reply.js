@@ -9,7 +9,6 @@ const { getTweetById } = require("../lib/tweets");
 
 const client = new DynamoDB.DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
-const _ = require("lodash");
 
 const { USERS_TABLE, TIMELINES_TABLE, TWEETS_TABLE } = process.env;
 
@@ -104,5 +103,5 @@ async function getUserIdsToReplyTo(tweet) {
     userIds = userIds.concat(await getUserIdsToReplyTo(retweetOf));
   }
 
-  return _.uniq(userIds);
+  return (userIds);
 }
