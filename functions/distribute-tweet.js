@@ -12,16 +12,16 @@ const Constants = require('../lib/constants');
 const _ = require('lodash');
 
 module.exports.handler = async (event) => {
-    for(const record of event.Records) {
-        if(record.eventName === 'INSERT') {
-            const tweet = unmarshall(event.dynamodb.NewImage);
-            const followers = await getFollowers(tweet.creator);
-            await distributeTweet(tweet, followers);
-        }else if(record.eventName === 'REMOVE') {
-            const tweet = unmarshall(event.dynamodb.NewImage);
-            const followers = await getFollowers(tweet.creator);
-            await unDistributeTweet(tweet, followers);
-        }
+    for (const record of event.Records) {
+      if (record.eventName === "INSERT") {
+        const tweet = unmarshall(record.dynamodb.NewImage);
+        const followers = await getFollowers(tweet.creator);
+        await distributeTweet(tweet, followers);
+      } else if (record.eventName === "REMOVE") {
+        const tweet = unmarshall(record.dynamodb.OldImage);
+        const followers = await getFollowers(tweet.creator);
+        await unDistributeTweet(tweet, followers);
+      }
     }
 };
 

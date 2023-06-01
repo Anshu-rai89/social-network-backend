@@ -15,20 +15,22 @@ const MaxTweetsSize = parseInt(MAX_TWEETS_SIZE);
 module.exports.handler = async (event) => {
   for (const record of event.Records) {
     if (record.eventName === "INSERT") {
-      const relationship = unmarshall(event.dynamodb.NewImage);
+      const relationship = unmarshall(record.dynamodb.NewImage);
       const [relType] = relationship.sk.split("_");
       if (relType === "FOLLOW") {
         const tweets = await getTweets(relationship.otherUserId);
         await distributeTweet(tweets, relationship.otherUserId);
       }
-     
     } else if (record.eventName === "REMOVE") {
-     const relationship = unmarshall(event.dynamodb.NewImage);
-     const [relType] = relationship.sk.split("_");
-     if (relType === "FOLLOW") {
-       const tweets = await getTimelineEntries(relationship.otherUserId,relationship.userId);
-       await unDistributeTweet(tweets, relationship.otherUserId);
-     }
+      const relationship = unmarshall(record.dynamodb.OldImage);
+      const [relType] = relationship.sk.split("_");
+      if (relType === "FOLLOW") {
+        const tweets = await getTimelineEntries(
+          relationship.otherUserId,
+          relationship.userId
+        );
+        await unDistributeTweet(tweets, relationship.otherUserId);
+      }
     }
   }
 };
