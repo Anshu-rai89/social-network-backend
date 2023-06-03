@@ -1,0 +1,9 @@
+#if (!$util.isNull($context.result.cancellationReasons))
+    $util.error("DynamoDb transaction error")
+#end
+
+#if (!$util.isNull($context.error))
+    $util.error("Failed to execute dynamodb transation")
+#end
+
+true
