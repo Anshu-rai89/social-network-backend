@@ -137,26 +137,34 @@ functions:
 
   distributeTweets:
     handler: functions/distribute-tweet.handler
+    maximumRetryAttempts: 1
+    maximumEventAge: 100
     events:
       - stream:
           type: dynamodb
           arn: !GetAtt TweetsTable.StreamArn
     environment:
-      RELATIONSHIP_TABLE: !Ref RelationshipsTable
+      RELATIONSHIPS_TABLE: !Ref RelationshipsTable
       TIMELINES_TABLE: !Ref TimelineTable
     iamRoleStatements:
       - Effect: Allow
         Action: dynamodb:PutItem
         Resource: !GetAtt TimelineTable.Arn
       - Effect: Allow
+        Action: dynamodb:BatchWriteItem
+        Resource: !GetAtt TimelineTable.Arn
+        
+      - Effect: Allow
         Action: dynamodb:DeleteItem
         Resource: !GetAtt TimelineTable.Arn
       - Effect: Allow
-        Action: dynamodb:QueryItem
-        Resource: !GetAtt RelationshipsTable.Arn
+        Action: dynamodb:Query
+        Resource: !Sub "${RelationshipsTable.Arn}/index/byOtherUser"
 
   distributeTweetsToFollower:
     handler: functions/distribute-tweet-to-follower.handler
+    maximumRetryAttempts: 1
+    maximumEventAge: 100
     events:
       - stream:
           type: dynamodb
@@ -171,13 +179,16 @@ functions:
         Action: dynamodb:PutItem
         Resource: !GetAtt TimelineTable.Arn
       - Effect: Allow
+        Action: dynamodb:BatchWriteItem
+        Resource: !GetAtt TimelineTable.Arn
+      - Effect: Allow
         Action: dynamodb:DeleteItem
         Resource: !GetAtt TimelineTable.Arn
       - Effect: Allow
-        Action: dynamodb:QueryItem
-        Resource: 
-          - !GetAtt TweetsTable.Arn
-          - !GetAtt TimelineTable.Arn
+        Action: dynamodb:Query
+        Resource:
+          - !Sub "${TweetsTable.Arn}/index/byCreator"
+          - !Sub "${TimelineTable.Arn}/index/byDistributedFrom"
 
 resources:
   Resources:
