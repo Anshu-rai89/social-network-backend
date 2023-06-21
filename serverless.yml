@@ -190,6 +190,36 @@ functions:
           - !Sub "${TweetsTable.Arn}/index/byCreator"
           - !Sub "${TimelineTable.Arn}/index/byDistributedFrom"
 
+  syncUsersToAlgolia: 
+    handler: functions/sync-user-to-algolia.handler
+    maximumRetryAttempts: 1
+    maximumEventAge: 100
+    events:
+      - stream:
+          type: dynamodb
+          arn: !GetAtt UsersTable.StreamArn
+    iamRoleStatements:
+      - Effect: Allow
+        Action: ssm:GetParameters
+        Resource: 
+          - !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${self:custom.stage}/aloglia-app-id
+          - !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${self:custom.stage}/algolia-admin-key
+  
+  syncTweetsToAlgolia: 
+    handler: functions/sync-tweet-to-algolia.handler
+    maximumRetryAttempts: 1
+    maximumEventAge: 100
+    events:
+      - stream:
+          type: dynamodb
+          arn: !GetAtt TweetsTable.StreamArn
+    iamRoleStatements:
+      - Effect: Allow
+        Action: ssm:GetParameters
+        Resource: 
+          - !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${self:custom.stage}/aloglia-app-id
+          - !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${self:custom.stage}/algolia-admin-key
+
 resources:
   Resources:
     UsersTable:
@@ -216,6 +246,8 @@ resources:
             Value: ${self:custom.stage}
           - Key: Name
             Value: users-table
+        StreamSpecification:
+          StreamViewType: NEW_AND_OLD_IMAGES
     
     TweetsTable:
       Type: AWS::DynamoDB::Table

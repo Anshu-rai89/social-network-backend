@@ -32,7 +32,25 @@ mappingTemplates:
   - type: Query
     field: getProfile
     dataSource: usersTable
+
+  - type: Query
+    field: getFollowers
+    kind: PIPELINE
+    functions: 
+      - getFollowers
+      - hydrateUsers
+    request: pipeline.request.vtl
+    response: pipeline.response.vtl
   
+  - type: Query
+    field: getFollowing
+    kind: PIPELINE
+    functions: 
+      - getFollowing
+      - hydrateFollowingsUsers
+    request: pipeline.request.vtl
+    response: pipeline.response.vtl
+
   - type: Mutation
     field: editMyProfile
     dataSource: usersTable
@@ -127,6 +145,15 @@ mappingTemplates:
     dataSource: relationshipsTable
   
 
+functionConfigurations:
+  - name: getFollowers
+    dataSource: relationshipsTable
+  - name: hydrateUsers
+    dataSource: usersTable
+  - name: hydrateFollowingsUsers
+    dataSource: usersTable
+  - name: getFollowing
+    dataSource: relationshipsTable
 
 dataSources:
   - type: NONE
