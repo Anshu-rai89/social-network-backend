@@ -51,6 +51,12 @@ mappingTemplates:
     request: pipeline.request.vtl
     response: pipeline.response.vtl
 
+  - type: Query
+    field: search
+    dataSource: searchFunction
+    request: false
+    response: false
+
   - type: Mutation
     field: editMyProfile
     dataSource: usersTable
@@ -137,7 +143,7 @@ mappingTemplates:
     dataSource: usersTable
 
   - type: OtherProfile
-    field: following
+    field: following 
     dataSource: relationshipsTable
   
   - type: OtherProfile
@@ -254,6 +260,11 @@ dataSources:
     name: replyFunction
     config:
       functionName: reply
+
+  - type: AWS_LAMBDA
+    name: searchFunction
+    config:
+      functionName: search
 
 substitutions:
   TweetsTable: !Ref TweetsTable

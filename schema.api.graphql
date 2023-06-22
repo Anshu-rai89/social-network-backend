@@ -22,10 +22,10 @@ type Query {
   getFollowing(userId: ID!, limit: Int!, nextToken: String): ProfilesPage!
 
   search(
-    query: !String,
-    nextToken: !String,
-    mode: !SearchMode,
-    limit: !Int
+    query: String!,
+    nextToken: String!,
+    mode: SearchMode!,
+    limit: Int!
   ): SearchResultPage!
 }
 
@@ -177,9 +177,9 @@ enum SearchMode {
   Videos
 }
 
-union SearchResult = MyProfile | OtherProfile | Tweet | Reply;
+union SearchResult = MyProfile | OtherProfile | Tweet | Reply
 
 type SearchResultPage {
-  results: [!SearchResult],
-  nextToken: !String
+  results: [SearchResult!],
+  nextToken: String!
 }
