@@ -28,7 +28,7 @@ custom:
     disablePostDeployGeneration: true
     disableOutput: true
     silent: true
-  stage: ${opt:stage, self:provider.stage}
+  stage: ${opt:stage, 'dev'}
 
 functions:
   confirmUsersSignup:
