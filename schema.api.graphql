@@ -20,6 +20,13 @@ type Query {
   getFollowers(userId: ID!, limit: Int!, nextToken: String): ProfilesPage!
 
   getFollowing(userId: ID!, limit: Int!, nextToken: String): ProfilesPage!
+
+  search(
+    query: !String,
+    nextToken: !String,
+    mode: !SearchMode,
+    limit: !Int
+  ): SearchResultPage!
 }
 
 type Mutation {
@@ -160,4 +167,19 @@ type UnHydratedTweetsPage {
 type ProfilesPage {
   profiles: [IProfile!]
   nextToken: String
+}
+
+enum SearchMode {
+  Top,
+  Latest,
+  People,
+  Photos,
+  Videos
+}
+
+union SearchResult = MyProfile | OtherProfile | Tweet | Reply;
+
+type SearchResultPage {
+  results: [!SearchResult],
+  nextToken: !String
 }
